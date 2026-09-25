@@ -47,11 +47,26 @@ jobs:
             PKGDEST="$GITHUB_WORKSPACE/dist" \
             makepkg --syncdeps --noconfirm --cleanbuild --clean
 
+      - name: Prepare the package artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t packages < <(
+            find "$GITHUB_WORKSPACE/dist" -maxdepth 1 -type f -name '*.pkg.tar.zst' -print
+          )
+          if ((${#packages[@]} != 1)); then
+            printf 'Expected one package, found %d\n' "${#packages[@]}" >&2
+            printf '%s\n' "${packages[@]}" >&2
+            exit 1
+          fi
+          install -d "$GITHUB_WORKSPACE/artifact"
+          install -m 0644 "${packages[0]}" \
+            "$GITHUB_WORKSPACE/artifact/clementine-git.pkg.tar.zst"
+
       - name: Upload the Arch package
         uses: actions/upload-artifact@v7
         with:
-          name: clementine-git-package
-          path: dist/*.pkg.tar.zst
+          path: artifact/clementine-git.pkg.tar.zst
           if-no-files-found: error
           retention-days: 7
-          compression-level: 0
+          archive: false
