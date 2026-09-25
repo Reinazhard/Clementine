@@ -10,8 +10,8 @@
 # Based on community/clementine PKGBUILD
 
 pkgname=clementine-git
-pkgver=1.4.1.r106.ga4b3599ec
-pkgrel=3
+pkgver=1.4.1.r188.ge1d1306f3
+pkgrel=4
 pkgdesc='A modern music player and library organizer'
 arch=(x86_64)
 url="https://github.com/clementine-player/Clementine"
@@ -30,15 +30,14 @@ depends=(
     libgcc
     libglvnd
     #libgpod
-    #liblastfm-qt5 # removed from Arch repo
     #libmtp
     libpulse
     libstdc++
     libx11
     #projectm # now use bundled v4.x, Arch is at v3.x
     protobuf
-    qt5-base
-    qt5-x11extras
+    qt6-5compat
+    qt6-base
     sqlite
     taglib
     zlib
@@ -50,7 +49,7 @@ makedepends=(
     git
     glu
     pkgconf
-    qt5-tools
+    qt6-tools
     #sparsehash
     )
 optdepends=(
