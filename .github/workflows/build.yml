@@ -1,0 +1,58 @@
+name: Build AUR package
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build package
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    container:
+      image: archlinux:base-devel
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Prepare the build user
+        shell: bash
+        run: |
+          set -euo pipefail
+          pacman -Syu --noconfirm
+          pacman -S --needed --noconfirm sudo
+          useradd --create-home --shell /bin/bash builder
+          printf 'builder ALL=(root) NOPASSWD: /usr/bin/pacman *\n' > /etc/sudoers.d/builder
+          chmod 0440 /etc/sudoers.d/builder
+          visudo -cf /etc/sudoers.d/builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+
+      - name: Build the Arch package
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -d -o builder -g builder "$GITHUB_WORKSPACE/dist"
+          runuser --user builder -- env \
+            MAKEFLAGS="-j$(nproc)" \
+            PKGDEST="$GITHUB_WORKSPACE/dist" \
+            makepkg --syncdeps --noconfirm --cleanbuild --clean
+
+      - name: Upload the Arch package
+        uses: actions/upload-artifact@v7
+        with:
+          name: clementine-git-package
+          path: dist/*.pkg.tar.zst
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
