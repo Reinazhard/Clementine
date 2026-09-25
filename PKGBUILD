@@ -11,7 +11,7 @@
 
 pkgname=clementine-git
 pkgver=1.4.1.r188.ge1d1306f3
-pkgrel=5
+pkgrel=6
 pkgdesc='A modern music player and library organizer'
 arch=(x86_64)
 url="https://github.com/clementine-player/Clementine"
@@ -63,7 +63,7 @@ optdepends=(
     )
 conflicts=(clementine)
 provides=(clementine)
-options=(lto)
+options=(!debug lto)
 source=("git+https://github.com/clementine-player/Clementine.git")
 sha256sums=('SKIP')
 
