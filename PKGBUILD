@@ -10,8 +10,8 @@
 # Based on community/clementine PKGBUILD
 
 pkgname=clementine-git
-pkgver=1.4.1.r79.g841f3251d.0.g841f3251d
-pkgrel=1
+pkgver=1.4.1.r106.ga4b3599ec
+pkgrel=3
 pkgdesc='A modern music player and library organizer'
 arch=(x86_64)
 url="https://github.com/clementine-player/Clementine"
@@ -36,7 +36,7 @@ depends=(
     libstdc++
     libx11
     #projectm # now use bundled v4.x, Arch is at v3.x
-    protobuf libprotobuf.so
+    protobuf
     qt5-base
     qt5-x11extras
     sqlite
@@ -46,8 +46,10 @@ depends=(
 makedepends=(
     boost
     cmake
+    gettext
     git
     glu
+    pkgconf
     qt5-tools
     #sparsehash
     )
@@ -58,6 +60,7 @@ optdepends=(
     'gst-plugins-ugly: "Ugly" plugin libraries'
     'gst-libav: FFmpeg plugin'
     'gvfs: Various devices support'
+    'udisks2: Removable device support'
     )
 conflicts=(clementine)
 provides=(clementine)
@@ -66,27 +69,17 @@ source=("git+https://github.com/clementine-player/Clementine.git")
 sha256sums=('SKIP')
 
 pkgver() {
-  cd Clementine
-  git describe --long --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
-}
-
-prepare() {
-  #sed -i 's/cmake_policy(SET CMP0053 OLD)/cmake_policy(SET CMP0026 NEW)/' Clementine/CMakeLists.txt
-  true
+  git -C "$srcdir/Clementine" describe --tags --always |
+    sed 's/\([^-]*-g\)/r\1/;s/-/./g'
 }
 
 build() {
-  # Disable all warnings
-  export CFLAGS+=" -w"
-  export CXXFLAGS+=" -w"
-
-  #export CXXFLAGS+=" -Wno-error=cpp"
-  export CXXFLAGS+=" -Wno-unused-result"
-  export CXXFLAGS+=" -Wno-error=stringop-overflow"
-
   local _flags=(
+    -DBUILD_WERROR=OFF
+    -DCMAKE_BUILD_TYPE=Release
     -DENABLE_BOX=OFF
     -DENABLE_DROPBOX=OFF
+    -DENABLE_FAST_MATH=OFF
     -DENABLE_GOOGLE_DRIVE=OFF
     -DENABLE_LIBGPOD=OFF
     -DENABLE_LIBLASTFM=OFF
@@ -95,12 +88,11 @@ build() {
     -DENABLE_SKYDRIVE=OFF
     -DENABLE_SPARKLE=OFF
     -DENABLE_WIIMOTEDEV=OFF
-    #-DUSE_SYSTEM_PROJECTM=ON
+    -DUSE_SYSTEM_PROJECTM=OFF
     -DUSE_SYSTEM_TAGLIB=ON
   )
 
-  cmake -B build -S Clementine -Wno-dev \
-    -DCMAKE_BUILD_TYPE=None \
+  cmake -B build -S "$srcdir/Clementine" -Wno-dev \
     -DCMAKE_INSTALL_PREFIX=/usr \
     "${_flags[@]}"
 
