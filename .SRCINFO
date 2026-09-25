@@ -1,7 +1,7 @@
 pkgbase = clementine-git
 	pkgdesc = A modern music player and library organizer
 	pkgver = 1.4.1.r188.ge1d1306f3
-	pkgrel = 4
+	pkgrel = 5
 	url = https://github.com/clementine-player/Clementine
 	arch = x86_64
 	license = GPL-3.0-or-later
@@ -42,6 +42,7 @@ pkgbase = clementine-git
 	optdepends = udisks2: Removable device support
 	provides = clementine
 	conflicts = clementine
+	options = lto
 	source = git+https://github.com/clementine-player/Clementine.git
 	sha256sums = SKIP
 
